@@ -1,0 +1,10 @@
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore sensitive files
+config.php
+
+# Ignore IDE/project files
+.vscode/
+.idea/
