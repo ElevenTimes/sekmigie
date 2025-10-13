@@ -7,16 +7,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = trim($_POST['email']);
     $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
 
-    $stmt = $conn->prepare("INSERT INTO users (username, email, password) VALUES (?, ?, ?)");
+    $stmt = $conn->prepare("INSERT INTO user (username, email, password_hash) VALUES (?, ?, ?)");
     $stmt->bind_param("sss", $username, $email, $password);
 
     if ($stmt->execute()) {
+        // Get the inserted user's ID
+        $user_id = $stmt->insert_id;
+        $_SESSION['user_id'] = $user_id;
         $_SESSION['username'] = $username;
-        header("Location: dashboard.php");
+        header("Location: index.php");
         exit();
-    } else {
-        echo "Registration failed: " . $stmt->error;
     }
+
 }
 ?>
 
