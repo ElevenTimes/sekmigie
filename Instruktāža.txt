@@ -1,0 +1,84 @@
+Project: Single-Player Kahoot-Like Web App
+Overview
+
+This project is a single-player quiz web application inspired by Kahoot. The goal is to allow users to create, share, and play quizzes online. Unlike Kahoot, this is designed for individual play, but users can also see quizzes created by others in a “forum” style feed.
+
+Key Features
+
+User Authentication
+
+Users can register, log in, and log out.
+
+Only registered users can create quizzes or access certain features like profile management.
+
+Quiz Creation
+
+Logged-in users can create quizzes with multiple questions.
+
+Each question can have multiple choice, true/false, or text input answers.
+
+Questions include answer options, with the ability to mark correct answers.
+
+Quiz Forum / Listing
+
+On the main page, users can see a list of quizzes created by other users.
+
+Users can browse quizzes, but only logged-in users can create new quizzes.
+
+Single-Player Quiz Play
+
+Users can attempt quizzes and get scored based on correct answers.
+
+Each attempt is stored so users can track past performance.
+
+Dynamic Navbar
+
+Displays different options depending on whether the user is logged in or not (Register/Login vs Profile/Logout).
+
+Responsive Design with Tailwind CSS
+
+The UI is styled with Tailwind for modern, responsive layouts.
+
+Centralized “Create Quiz” button, clean quiz cards, and forum layout.
+
+Database Structure
+
+The project uses MySQL with the following main tables:
+
+user – stores user accounts (username, email, password hash, profile picture).
+
+quiz – stores quizzes and links them to the creator.
+
+question – stores questions for each quiz.
+
+answer_option – stores possible answers for questions, with correct answers marked.
+
+quiz_attempt – stores a user’s attempt at a quiz, including score and timestamps.
+
+user_answer – stores each answer a user gave in an attempt.
+
+File Structure (Simplified)
+sekmigie/
+├── index.php          # Main page with Create Quiz button and quiz forum
+├── navbar.php         # Reusable navigation bar
+├── register.php       # User registration
+├── login.php          # User login
+├── dashboard.php      # Optional dashboard for users
+├── create_quiz.php    # Page to create new quizzes
+├── config.php         # Database connection (ignored in GitHub)
+├── db_init.php        # Database initialization script
+├── .gitignore
+├── styles/            # Optional CSS or Tailwind build
+└── ...other PHP files
+
+Workflow
+
+User registers or logs in.
+
+On index.php, user sees Create Quiz button if logged in.
+
+Below the button is a forum listing quizzes created by others.
+
+Logged-in users can create quizzes via create_quiz.php.
+
+Users can attempt quizzes, and attempts are stored in the database.
