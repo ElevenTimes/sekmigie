@@ -11,7 +11,16 @@ $stmt = $conn->prepare("SELECT q.id, q.title, u.username FROM quiz q JOIN user u
 $stmt->execute();
 $result = $stmt->get_result();
 $quizzes = $result->fetch_all(MYSQLI_ASSOC);
+
+$stmt = $conn->prepare("
+    SELECT q.id, q.title, q.creator_id, u.username 
+    FROM quiz q 
+    JOIN user u ON q.creator_id = u.id 
+    ORDER BY q.created_at DESC
+");
+
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -36,18 +45,24 @@ $quizzes = $result->fetch_all(MYSQLI_ASSOC);
     <!-- Quizzes Forum -->
     <div class="mt-10 w-full max-w-3xl">
         <h2 class="text-xl font-bold mb-4">Quizzes by other users</h2>
-        <?php if (count($quizzes) > 0): ?>
-            <ul class="space-y-4">
-                <?php foreach ($quizzes as $quiz): ?>
-                    <li class="p-4 bg-white rounded shadow flex justify-between items-center">
-                        <span class="font-semibold"><?= htmlspecialchars($quiz['title']) ?></span>
-                        <span class="text-gray-500 text-sm">by <?= htmlspecialchars($quiz['username']) ?></span>
-                    </li>
-                <?php endforeach; ?>
-            </ul>
-        <?php else: ?>
-            <p class="text-gray-500">No quizzes created yet.</p>
-        <?php endif; ?>
+        <?php foreach ($quizzes as $quiz): ?>
+            <li class="p-4 bg-white rounded shadow flex justify-between items-center">
+                <div>
+                    <span class="font-semibold"><?= htmlspecialchars($quiz['title']) ?></span>
+                    <span class="text-gray-500 text-sm ml-2">by 
+                        <a href="profile.php?user_id=<?= $quiz['creator_id'] ?>" class="text-blue-600 underline">
+                            <?= htmlspecialchars($quiz['username']) ?>
+                        </a>
+                    </span>
+                </div>
+                <?php if ($isLoggedIn): ?>
+                    <a href="play_quiz.php?quiz_id=<?= $quiz['id'] ?>" class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition">
+                        Play
+                    </a>
+                <?php endif; ?>
+            </li>
+        <?php endforeach; ?>
+
     </div>
 </div>
 
