@@ -3,22 +3,35 @@ session_start();
 include 'navbar.php';
 require 'config.php';
 
-// Check if user is logged in
 $isLoggedIn = isset($_SESSION['user_id']);
 
-// Fetch quizzes created by all users
-// This query is now correctly structured and only run once.
+// Allowed sorting options
+$allowed_sorts = [
+    'title' => 'q.title',
+    'created_at' => 'q.created_at',
+    'updated_at' => 'q.updated_at'
+];
+
+// Determine sort field (default: created_at)
+$sort = isset($_GET['sort']) && isset($allowed_sorts[$_GET['sort']]) ? $_GET['sort'] : 'created_at';
+
+// Determine sort order (default: DESC)
+$order = isset($_GET['order']) && strtolower($_GET['order']) === 'asc' ? 'ASC' : 'DESC';
+$orderBy = $allowed_sorts[$sort] . " " . $order;
+
+// Fetch quizzes
 $stmt = $conn->prepare("
-    SELECT q.id, q.title, q.creator_id, u.username 
+    SELECT q.id, q.title, q.creator_id, q.created_at, q.updated_at, u.username 
     FROM quiz q 
     JOIN user u ON q.creator_id = u.id 
-    ORDER BY q.created_at DESC
+    ORDER BY $orderBy
 ");
 $stmt->execute();
 $result = $stmt->get_result();
 $quizzes = $result->fetch_all(MYSQLI_ASSOC);
 
-// Note: The redundant second $stmt query from the original code has been removed.
+// Determine opposite order for next click
+$nextOrder = ($order === 'ASC') ? 'desc' : 'asc';
 ?>
 
 <!DOCTYPE html>
@@ -49,7 +62,28 @@ $quizzes = $result->fetch_all(MYSQLI_ASSOC);
     </div>
 
     <div class="w-full max-w-4xl">
-        <h2 class="text-2xl font-bold text-gray-800 border-b pb-2 mb-6">Popular Quizzes</h2>
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-800 border-b pb-2">Popular Quizzes</h2>
+
+            <!-- Sorting Buttons -->
+            <div class="flex gap-2">
+                <?php
+                $buttons = [
+                    'title' => 'Title',
+                    'created_at' => 'Created',
+                    'updated_at' => 'Updated'
+                ];
+                foreach ($buttons as $key => $label):
+                    $isActive = $sort === $key;
+                    $arrow = $isActive ? ($order === 'ASC' ? '↑' : '↓') : '';
+                ?>
+                    <a href="?sort=<?= $key ?>&order=<?= $isActive ? $nextOrder : 'asc' ?>"
+                       class="px-3 py-2 text-sm font-semibold rounded-lg border <?= $isActive ? 'bg-purple-700 text-white border-purple-700' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100' ?>">
+                        <?= $label ?> <?= $arrow ?>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+        </div>
         
         <?php if (empty($quizzes)): ?>
             <p class="text-center text-gray-500 py-10 bg-white rounded-lg shadow-md">No quizzes have been created yet. Be the first!</p>
@@ -78,9 +112,9 @@ $quizzes = $result->fetch_all(MYSQLI_ASSOC);
                 <?php endforeach; ?>
             </ul>
         <?php endif; ?>
-
     </div>
 </div>
 
 </body>
 </html>
+
