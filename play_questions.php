@@ -85,7 +85,7 @@ if ($current_index >= count($questions)) {
         <div class="flex justify-center items-center mb-10">
         <div 
             class="relative w-32 h-32 rounded-full flex items-center justify-center text-4xl font-bold text-blue-600 border-8 border-gray-200" 
-            style="background: conic-gradient(rgb(37 99 235) {$percentage_score}%, rgb(0 0 0) 0%);"
+            style="background: conic-gradient(rgb(0 0 0) {$percentage_score}%, rgb(0 0 0) 0%);"
         >
             {$percentage_score}<span class="text-xl">%</span>
         </div>
