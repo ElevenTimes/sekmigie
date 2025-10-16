@@ -47,17 +47,63 @@ if ($current_index >= count($questions)) {
     $stmt->bind_param("i", $attempt_id);
     $stmt->execute();
     $score = $stmt->get_result()->fetch_assoc()['correct_count'];
+    $total_questions = count($questions);
+    $percentage_score = $total_questions > 0 ? round(($score / $total_questions) * 100) : 0;
 
     // Update quiz_attempt
     $stmt = $conn->prepare("UPDATE quiz_attempt SET score=?, finished_at=NOW() WHERE id=?");
     $stmt->bind_param("ii", $score, $attempt_id);
     $stmt->execute();
 
-    echo "<div class='max-w-3xl mx-auto mt-12 bg-white p-8 rounded shadow-md'>
-            <h2 class='text-2xl font-bold mb-4'>Quiz Finished!</h2>
-            <p>Your score: $score / ".count($questions)."</p>
-            <a href='index.php' class='mt-4 inline-block px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition'>Back to Home</a>
-          </div>";
+    // --- START OF NEW/IMPROVED DESIGN ---
+    echo <<<HTML
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Finished!</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Ensures the progress ring border is handled correctly */
+        .relative {
+            box-sizing: border-box; 
+        }
+    </style>
+    </head>
+    <body class="bg-gray-100 text-gray-800">
+    
+    <div class="max-w-xl mx-auto mt-16 bg-white p-8 md:p-10 rounded-xl shadow-2xl text-center">
+        <div class="mb-6">
+            <svg class="w-16 h-16 mx-auto text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+        </div>
+        <h2 class="text-3xl font-extrabold text-gray-900 mb-2">🎉 Quiz Finished!</h2>
+        <p class="text-lg text-gray-600 mb-8">You have successfully completed the **{$attempt['quiz_title']}** quiz.</p>
+
+        <div class="flex justify-center items-center mb-10">
+        <div 
+            class="relative w-32 h-32 rounded-full flex items-center justify-center text-4xl font-bold text-blue-600 border-8 border-gray-200" 
+            style="background: conic-gradient(rgb(37 99 235) {$percentage_score}%, rgb(0 0 0) 0%);"
+        >
+            {$percentage_score}<span class="text-xl">%</span>
+        </div>
+    </div>
+        
+        <p class="text-2xl font-semibold text-gray-800 mb-6">
+            Your Score: <span class="text-blue-600">{$score}</span> out of {$total_questions}
+        </p>
+
+        <a href="index.php" class="w-full sm:w-auto inline-block px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition duration-300 transform hover:scale-105 shadow-lg">
+            Go Back to Home
+        </a>
+    </div>
+
+    </body>
+    </html>
+HTML;
+    // --- END OF NEW/IMPROVED DESIGN ---
     exit();
 }
 
@@ -119,19 +165,19 @@ $question = $questions[$current_index];
             $stmt->execute();
             $options = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             foreach ($options as $opt): ?>
-                <div>
-                    <label class="inline-flex items-center">
-                        <input type="radio" name="answer_option_id" value="<?= $opt['id'] ?>" class="mr-2" required>
-                        <?= htmlspecialchars($opt['text']) ?>
+                <div class="bg-gray-50 p-3 rounded-lg border border-gray-200 hover:bg-blue-50 transition duration-150">
+                    <label class="inline-flex items-center w-full cursor-pointer">
+                        <input type="radio" name="answer_option_id" value="<?= $opt['id'] ?>" class="mr-3 text-blue-600 focus:ring-blue-500" required>
+                        <span class="text-base"><?= htmlspecialchars($opt['text']) ?></span>
                     </label>
                 </div>
             <?php endforeach; ?>
         <?php elseif ($question['type'] === 'text_input'): ?>
-            <input type="text" name="text_answer" class="w-full border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+            <input type="text" name="text_answer" class="w-full border p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter your answer here..." required>
         <?php endif; ?>
 
-        <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
-            Submit
+        <button type="submit" class="w-full px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition transform hover:scale-[1.01]">
+            Submit Answer
         </button>
     </form>
 </div>
