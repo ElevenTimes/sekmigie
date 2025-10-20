@@ -52,7 +52,7 @@ $nextOrder = ($order === 'ASC') ? 'desc' : 'asc';
 <div class="flex flex-col items-center justify-center mt-12 px-4">
     <div class="w-full max-w-4xl text-center mb-10">
         <?php if ($isLoggedIn): ?>
-            <a href="create_quiz.php" class="px-10 py-4 bg-purple-700 text-white text-lg font-extrabold rounded-xl shadow-lg hover:bg-purple-800 transition duration-300 transform hover:scale-105">
+            <a href="create_quiz.php" class="px-10 py-4 bg-blue-600 text-white text-lg font-extrabold rounded-xl shadow-lg hover:bg-purple-800 transition duration-300 transform hover:scale-105">
                 + Create A New Quiz
             </a>
         <?php else: ?>
@@ -78,7 +78,7 @@ $nextOrder = ($order === 'ASC') ? 'desc' : 'asc';
                     $arrow = $isActive ? ($order === 'ASC' ? '↑' : '↓') : '';
                 ?>
                     <a href="?sort=<?= $key ?>&order=<?= $isActive ? $nextOrder : 'asc' ?>"
-                       class="px-3 py-2 text-sm font-semibold rounded-lg border <?= $isActive ? 'bg-purple-700 text-white border-purple-700' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100' ?>">
+                       class="px-3 py-2 text-sm font-semibold rounded-lg border <?= $isActive ? 'bg-blue-600 text-white border-gray-200' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100' ?>">
                         <?= $label ?> <?= $arrow ?>
                     </a>
                 <?php endforeach; ?>
@@ -95,9 +95,10 @@ $nextOrder = ($order === 'ASC') ? 'desc' : 'asc';
                             <span class="text-xl font-bold text-gray-900 mb-1"><?= htmlspecialchars($quiz['title']) ?></span>
                             <span class="text-sm text-gray-500">
                                 Created by 
-                                <a href="profile.php?user_id=<?= $quiz['creator_id'] ?>" class="text-purple-600 font-semibold hover:underline">
+                                <a href="user_profile.php?id=<?= $quiz['creator_id'] ?>" class="text-blue-600 font-semibold hover:underline">
                                     @<?= htmlspecialchars($quiz['username']) ?>
                                 </a>
+
                             </span>
                         </div>
                         <?php if ($isLoggedIn): ?>

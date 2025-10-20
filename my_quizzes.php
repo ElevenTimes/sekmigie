@@ -1,5 +1,6 @@
 <?php
 session_start();
+include 'navbar.php';
 require 'config.php';
 
 if (!isset($_SESSION['user_id'])) {
@@ -20,75 +21,50 @@ $result = $stmt->get_result();
 <head>
     <meta charset="UTF-8">
     <title>My Quizzes</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            background-color: #f8fafc;
-            font-family: 'Segoe UI', sans-serif;
-        }
-        .container {
-            max-width: 900px;
-            margin-top: 50px;
-        }
-        .quiz-card {
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-            transition: transform 0.2s ease;
-        }
-        .quiz-card:hover {
-            transform: translateY(-4px);
-        }
-        .quiz-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .badge {
-            font-size: 0.85rem;
-        }
-        .actions a {
-            text-decoration: none;
-            margin-right: 10px;
-        }
-        .actions .btn {
-            border-radius: 30px;
-            font-size: 0.85rem;
-        }
-    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
+<body class="bg-gray-100 text-gray-800">
 
-<div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-semibold">My Quizzes</h2>
-        <a href="create_quiz.php" class="btn btn-primary btn-sm rounded-pill">
+<div class="max-w-5xl mx-auto mt-12 bg-white p-8 rounded-lg shadow-md">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-3xl font-bold">My Quizzes</h2>
+        <a href="create_quiz.php" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
             + Create New Quiz
         </a>
     </div>
 
     <?php if ($result->num_rows === 0): ?>
-        <div class="alert alert-info text-center py-4">
-            You haven't created any quizzes yet.<br>
-            <a href="create_quiz.php" class="btn btn-outline-primary mt-3">Create Your First Quiz</a>
+        <div class="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
+            <p class="text-gray-600 mb-4">You haven’t created any quizzes yet.</p>
+            <a href="create_quiz.php" class="px-5 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+                Create Your First Quiz
+            </a>
         </div>
     <?php else: ?>
-        <div class="row g-4">
+        <div class="space-y-4">
             <?php while ($quiz = $result->fetch_assoc()): ?>
-                <div class="col-12">
-                    <div class="card quiz-card p-4">
-                        <div class="quiz-header mb-2">
-                            <h5 class="fw-bold mb-0"><?= htmlspecialchars($quiz['title']) ?></h5>
-                            <span class="badge <?= $quiz['is_public'] ? 'bg-success' : 'bg-secondary' ?>">
-                                <?= $quiz['is_public'] ? 'Public' : 'Private' ?>
-                            </span>
-                        </div>
-                        <p class="text-muted mb-2 small">Created on <?= date("F j, Y", strtotime($quiz['created_at'])) ?></p>
-                        <p><?= nl2br(htmlspecialchars($quiz['description'])) ?></p>
-                        <div class="actions mt-3">
-                            <a href="edit_quiz.php?id=<?= $quiz['id'] ?>" class="btn btn-outline-primary btn-sm">Edit</a>
-                            <a href="delete_quiz.php?id=<?= $quiz['id'] ?>" class="btn btn-outline-danger btn-sm" onclick="return confirm('Are you sure you want to delete this quiz?')">Delete</a>
-                        </div>
+                <div class="p-6 border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="text-xl font-semibold"><?= htmlspecialchars($quiz['title']) ?></h3>
+                        <span class="px-3 py-1 rounded-full text-sm <?= $quiz['is_public'] ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-700' ?>">
+                            <?= $quiz['is_public'] ? 'Public' : 'Private' ?>
+                        </span>
+                    </div>
+                    <p class="text-gray-500 text-sm mb-2">
+                        Created on <?= date("F j, Y", strtotime($quiz['created_at'])) ?>
+                    </p>
+                    <p class="text-gray-700"><?= nl2br(htmlspecialchars($quiz['description'])) ?></p>
+
+                    <div class="flex gap-3 mt-4">
+                        <a href="edit_quiz.php?id=<?= $quiz['id'] ?>"
+                           class="px-4 py-1 border border-blue-600 text-blue-600 rounded hover:bg-blue-600 hover:text-white transition">
+                            Edit
+                        </a>
+                        <a href="delete_quiz.php?id=<?= $quiz['id'] ?>"
+                           onclick="return confirm('Are you sure you want to delete this quiz?')"
+                           class="px-4 py-1 border border-red-600 text-red-600 rounded hover:bg-red-600 hover:text-white transition">
+                            Delete
+                        </a>
                     </div>
                 </div>
             <?php endwhile; ?>
@@ -98,3 +74,4 @@ $result = $stmt->get_result();
 
 </body>
 </html>
+
