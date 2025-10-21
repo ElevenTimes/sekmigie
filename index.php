@@ -56,8 +56,7 @@ $nextOrder = ($order === 'ASC') ? 'desc' : 'asc';
                 + Create A New Quiz
             </a>
         <?php else: ?>
-            <p class="text-xl text-gray-700">Welcome to My Kahoot App!</p>
-            <p class="mt-2 text-red-600">Please <a href="login.php" class="underline font-semibold hover:text-red-700">login</a> to create or play a quiz.</p>
+            <p class="mt-2 text-red-600">Please <a href="login.php" class="underline font-semibold hover:text-red-700">login</a> or <a href="register.php" class="underline font-semibold hover:text-red-700">register</a> to create or play a quiz.</p>
         <?php endif; ?>
     </div>
 

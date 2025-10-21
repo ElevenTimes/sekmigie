@@ -150,6 +150,8 @@ $stmt->close();
                 class="px-6 py-2 bg-gray-300 text-gray-800 font-semibold rounded hover:bg-gray-400 transition">My Quizzes</a>
         </div>
     </form>
+    
+    <a href="logout.php" class="text-red-600">Logout</a>
 
     <div class="mt-6 text-gray-500 text-sm">
         <p>Account created at: <?= $user['created_at'] ?></p>
