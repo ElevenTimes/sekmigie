@@ -19,40 +19,67 @@ $sort = isset($_GET['sort']) && isset($allowed_sorts[$_GET['sort']]) ? $_GET['so
 $order = isset($_GET['order']) && strtolower($_GET['order']) === 'asc' ? 'ASC' : 'DESC';
 $orderBy = $allowed_sorts[$sort] . " " . $order;
 
+// --- Search Handling ---
+$search = isset($_GET['search']) ? trim($_GET['search']) : '';
+$whereClause = '';
+$bindTypes = '';
+$bindParams = [];
+
+if (!empty($search)) {
+    // Add a WHERE clause to search by quiz title or username (case-insensitive)
+    $whereClause = "WHERE q.title LIKE ? OR u.username LIKE ?";
+    $searchTerm = "%" . $search . "%";
+    $bindTypes = 'ss';
+    $bindParams = [$searchTerm, $searchTerm];
+}
+// --- End Search Handling ---
+
 // Fetch quizzes
-$stmt = $conn->prepare("
+$sql = "
     SELECT q.id, q.title, q.creator_id, q.created_at, q.updated_at, u.username 
     FROM quiz q 
-    JOIN user u ON q.creator_id = u.id 
+    JOIN user u ON q.creator_id = u.id
+    $whereClause 
     ORDER BY $orderBy
-");
+";
+
+$stmt = $conn->prepare($sql);
+
+// Bind parameters if search is active
+if (!empty($bindParams)) {
+    // We use the spread operator (...) to pass the array elements as separate arguments
+    $stmt->bind_param($bindTypes, ...$bindParams);
+}
+
 $stmt->execute();
 $result = $stmt->get_result();
 $quizzes = $result->fetch_all(MYSQLI_ASSOC);
 
 // Determine opposite order for next click
 $nextOrder = ($order === 'ASC') ? 'desc' : 'asc';
+// Prepare search parameter to be included in sort links
+$searchQueryParam = !empty($search) ? '&search=' . urlencode($search) : '';
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quiz Dashboard</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    body {
-        font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+        }
+    </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
 
 <div class="flex flex-col items-center justify-center mt-12 px-4">
     <div class="w-full max-w-4xl text-center mb-10">
         <?php if ($isLoggedIn): ?>
-            <a href="create_quiz.php" class="px-10 py-4 bg-purple-700 text-white text-lg font-extrabold rounded-xl shadow-lg hover:bg-purple-800 transition duration-300 transform hover:scale-105">
+            <a href="create_quiz.php" class="px-10 py-4 bg-blue-600 text-white text-lg font-extrabold rounded-xl shadow-lg hover:bg-blue-800 transition duration-300 transform hover:scale-105">
                 + Create A New Quiz
             </a>
         <?php else: ?>
@@ -62,11 +89,32 @@ $nextOrder = ($order === 'ASC') ? 'desc' : 'asc';
     </div>
 
     <div class="w-full max-w-4xl">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-gray-800 border-b pb-2">Popular Quizzes</h2>
+        <h2 class="text-2xl font-bold text-gray-800 mb-4 border-b pb-2">Popular Quizzes</h2>
+        
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
+            
+            <!-- Search Form -->
+            <form method="GET" action="index.php" class="flex items-center space-x-2 w-full sm:w-auto">
+                <input type="text" name="search" placeholder="Search by name or author..." 
+                       value="<?= htmlspecialchars($search) ?>" 
+                       class="p-2 border border-gray-300 rounded-lg focus:ring-blue-600 focus:border-blue-600 w-full shadow-sm flex-grow">
+                
+                <button type="submit" class="shrink-0 px-3 py-2 text-sm font-semibold rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition duration-150 shadow-md">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </button>
+                
+                <?php if (!empty($search)): ?>
+                    <!-- Clear search button -->
+                    <a href="index.php?sort=<?= $sort ?>&order=<?= $order ?>" 
+                       class="text-sm text-red-500 hover:text-red-700 font-semibold p-2 transition duration-150"
+                       title="Clear Search">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </a>
+                <?php endif; ?>
+            </form>
 
             <!-- Sorting Buttons -->
-            <div class="flex gap-2">
+            <div class="flex gap-2 shrink-0">
                 <?php
                 $buttons = [
                     'title' => 'Title',
@@ -77,8 +125,8 @@ $nextOrder = ($order === 'ASC') ? 'desc' : 'asc';
                     $isActive = $sort === $key;
                     $arrow = $isActive ? ($order === 'ASC' ? '↑' : '↓') : '';
                 ?>
-                    <a href="?sort=<?= $key ?>&order=<?= $isActive ? $nextOrder : 'asc' ?>"
-                       class="px-3 py-2 text-sm font-semibold rounded-lg border <?= $isActive ? 'bg-purple-700 text-white border-purple-700' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100' ?>">
+                    <a href="?sort=<?= $key ?>&order=<?= $isActive ? $nextOrder : 'asc' ?><?= $searchQueryParam ?>"
+                        class="px-3 py-2 text-sm font-semibold rounded-lg border <?= $isActive ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100' ?>">
                         <?= $label ?> <?= $arrow ?>
                     </a>
                 <?php endforeach; ?>
@@ -86,7 +134,13 @@ $nextOrder = ($order === 'ASC') ? 'desc' : 'asc';
         </div>
         
         <?php if (empty($quizzes)): ?>
-            <p class="text-center text-gray-500 py-10 bg-white rounded-lg shadow-md">No quizzes have been created yet. Be the first!</p>
+            <p class="text-center text-gray-500 py-10 bg-white rounded-lg shadow-md">
+                <?php if (!empty($search)): ?>
+                    No quizzes found matching "<?= htmlspecialchars($search) ?>". Try a different search term.
+                <?php else: ?>
+                    No quizzes have been created yet. Be the first!
+                <?php endif; ?>
+            </p>
         <?php else: ?>
             <ul class="space-y-4">
                 <?php foreach ($quizzes as $quiz): ?>
@@ -117,4 +171,3 @@ $nextOrder = ($order === 'ASC') ? 'desc' : 'asc';
 
 </body>
 </html>
-
