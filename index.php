@@ -83,8 +83,7 @@ $searchQueryParam = !empty($search) ? '&search=' . urlencode($search) : '';
                 + Create A New Quiz
             </a>
         <?php else: ?>
-            <p class="text-xl text-gray-700">Welcome to My Kahoot App!</p>
-            <p class="mt-2 text-red-600">Please <a href="login.php" class="underline font-semibold hover:text-red-700">login</a> to create or play a quiz.</p>
+            <p class="mt-2 text-red-600">Please <a href="login.php" class="underline font-semibold hover:text-red-700">login</a> or <a href="register.php" class="underline font-semibold hover:text-red-700">register</a> to create or play a quiz.</p>
         <?php endif; ?>
     </div>
 
@@ -149,9 +148,10 @@ $searchQueryParam = !empty($search) ? '&search=' . urlencode($search) : '';
                             <span class="text-xl font-bold text-gray-900 mb-1"><?= htmlspecialchars($quiz['title']) ?></span>
                             <span class="text-sm text-gray-500">
                                 Created by 
-                                <a href="profile.php?user_id=<?= $quiz['creator_id'] ?>" class="text-purple-600 font-semibold hover:underline">
+                                <a href="user_profile.php?id=<?= $quiz['creator_id'] ?>" class="text-blue-600 font-semibold hover:underline">
                                     @<?= htmlspecialchars($quiz['username']) ?>
                                 </a>
+
                             </span>
                         </div>
                         <?php if ($isLoggedIn): ?>

@@ -80,12 +80,11 @@ if ($current_index >= count($questions)) {
             </svg>
         </div>
         <h2 class="text-3xl font-extrabold text-gray-900 mb-2">🎉 Quiz Finished!</h2>
-        <p class="text-lg text-gray-600 mb-8">You have successfully completed the **{$attempt['quiz_title']}** quiz.</p>
+        <p class="text-lg text-gray-600 mb-8">You have successfully completed the quiz.</p>
 
         <div class="flex justify-center items-center mb-10">
         <div 
-            class="relative w-32 h-32 rounded-full flex items-center justify-center text-4xl font-bold text-blue-600 border-8 border-gray-200" 
-            style="background: conic-gradient(rgb(0 0 0) {$percentage_score}%, rgb(0 0 0) 0%);"
+            class="relative w-32 h-32 rounded-full flex items-center justify-center text-4xl font-bold text-white bg-blue-600 border-8 border-gray-200" 
         >
             {$percentage_score}<span class="text-xl">%</span>
         </div>
@@ -155,6 +154,7 @@ $question = $questions[$current_index];
 <div class="max-w-3xl mx-auto mt-12 bg-white p-8 rounded-lg shadow-md">
     <h2 class="text-2xl font-bold mb-4"><?= htmlspecialchars($attempt['quiz_title']) ?></h2>
     <p class="mb-4 font-semibold">Question <?= $current_index + 1 ?> of <?= count($questions) ?></p>
+    <p class="mb-6"><?= htmlspecialchars($question['title']) ?></p>
     <p class="mb-6"><?= htmlspecialchars($question['text']) ?></p>
 
     <form method="post" class="space-y-4">
